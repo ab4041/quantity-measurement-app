@@ -2,21 +2,18 @@ package com.quantity;
 
 public class QuantityMeasurementApp {
 
-    // ---------- INTERFACE ----------
+    // Interface
 
     public interface IMeasurable {
 
-        double getConversionFactor();
-
         double convertToBaseUnit(double value);
 
-        double convertFromBaseUnit(double baseValue);
+        double convertFromBaseUnit(double value);
 
-        String getUnitName();
     }
 
 
-    // ---------- WEIGHT UNIT ENUM ----------
+    // Weight Units
 
     public enum WeightUnit implements IMeasurable {
 
@@ -24,125 +21,90 @@ public class QuantityMeasurementApp {
         GRAM(0.001),
         POUND(0.453592);
 
-        private final double conversionFactor;
+        private final double factor;
 
-        WeightUnit(double conversionFactor) {
-            this.conversionFactor = conversionFactor;
+        WeightUnit(double factor) {
+            this.factor = factor;
         }
 
-        @Override
-        public double getConversionFactor() {
-            return conversionFactor;
-        }
-
-        @Override
         public double convertToBaseUnit(double value) {
-            return value * conversionFactor;
+            return value * factor;
         }
 
-        @Override
         public double convertFromBaseUnit(double baseValue) {
-            return baseValue / conversionFactor;
+            return baseValue / factor;
         }
 
-        @Override
-        public String getUnitName() {
-            return name();
-        }
     }
 
 
-    // ---------- GENERIC QUANTITY CLASS ----------
+    // Volume Units
+
+    public enum VolumeUnit implements IMeasurable {
+
+        LITRE(1.0),
+        MILLILITRE(0.001),
+        GALLON(3.78541);
+
+        private final double factor;
+
+        VolumeUnit(double factor) {
+            this.factor = factor;
+        }
+
+        public double convertToBaseUnit(double value) {
+            return value * factor;
+        }
+
+        public double convertFromBaseUnit(double baseValue) {
+            return baseValue / factor;
+        }
+
+    }
+
+
+    // Generic Quantity Class
 
     public static class Quantity<U extends IMeasurable> {
 
         private final double value;
+
         private final U unit;
+
 
         public Quantity(double value, U unit) {
 
             if (unit == null)
                 throw new IllegalArgumentException("Unit cannot be null");
 
-            if (Double.isNaN(value) || Double.isInfinite(value))
-                throw new IllegalArgumentException("Invalid value");
-
             this.value = value;
+
             this.unit = unit;
+
         }
+
 
         public double getValue() {
+
             return value;
+
         }
 
-        public U getUnit() {
-            return unit;
-        }
-
-
-        // ---------- CONVERSION ----------
-
-        public Quantity<U> convertTo(U targetUnit) {
-
-            if (targetUnit == null)
-                throw new IllegalArgumentException("Target unit cannot be null");
-
-            double baseValue =
-                    unit.convertToBaseUnit(value);
-
-            double convertedValue =
-                    targetUnit.convertFromBaseUnit(baseValue);
-
-            return new Quantity<>(convertedValue, targetUnit);
-        }
-
-
-        // ---------- ADDITION ----------
 
         public Quantity<U> add(Quantity<U> other, U targetUnit) {
 
-            if (other == null || targetUnit == null)
-                throw new IllegalArgumentException("Invalid parameters");
+            double base1 = unit.convertToBaseUnit(value);
 
-            double base1 =
-                    unit.convertToBaseUnit(value);
-
-            double base2 =
-                    other.unit.convertToBaseUnit(other.value);
+            double base2 = other.unit.convertToBaseUnit(other.value);
 
             double sum = base1 + base2;
 
-            double result =
-                    targetUnit.convertFromBaseUnit(sum);
+            double result = targetUnit.convertFromBaseUnit(sum);
 
             return new Quantity<>(result, targetUnit);
+
         }
 
-
-        // ---------- EQUALITY ----------
-
-        @Override
-        public boolean equals(Object obj) {
-
-            if (this == obj)
-                return true;
-
-            if (!(obj instanceof Quantity<?>))
-                return false;
-
-            Quantity<?> other =
-                    (Quantity<?>) obj;
-
-            if (!unit.getClass().equals(other.unit.getClass()))
-                return false;
-
-            double base1 =
-                    unit.convertToBaseUnit(value);
-
-            double base2 =
-                    other.unit.convertToBaseUnit(other.value);
-
-            return Math.abs(base1 - base2) < 0.001;
-        }
     }
+
 }
