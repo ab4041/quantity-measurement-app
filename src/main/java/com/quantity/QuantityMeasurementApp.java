@@ -2,9 +2,23 @@ package com.quantity;
 
 public class QuantityMeasurementApp {
 
-    // ---------- WEIGHT UNITS ----------
+    // ---------- INTERFACE ----------
 
-    public enum WeightUnit {
+    public interface IMeasurable {
+
+        double getConversionFactor();
+
+        double convertToBaseUnit(double value);
+
+        double convertFromBaseUnit(double baseValue);
+
+        String getUnitName();
+    }
+
+
+    // ---------- WEIGHT UNIT ENUM ----------
+
+    public enum WeightUnit implements IMeasurable {
 
         KILOGRAM(1.0),
         GRAM(0.001),
@@ -16,24 +30,36 @@ public class QuantityMeasurementApp {
             this.conversionFactor = conversionFactor;
         }
 
+        @Override
+        public double getConversionFactor() {
+            return conversionFactor;
+        }
+
+        @Override
         public double convertToBaseUnit(double value) {
             return value * conversionFactor;
         }
 
+        @Override
         public double convertFromBaseUnit(double baseValue) {
             return baseValue / conversionFactor;
+        }
+
+        @Override
+        public String getUnitName() {
+            return name();
         }
     }
 
 
-    // ---------- QUANTITY MEASUREMENT CLASS ----------
+    // ---------- GENERIC QUANTITY CLASS ----------
 
-    public static class QuantityMeasurement {
+    public static class Quantity<U extends IMeasurable> {
 
         private final double value;
-        private final WeightUnit unit;
+        private final U unit;
 
-        public QuantityMeasurement(double value, WeightUnit unit) {
+        public Quantity(double value, U unit) {
 
             if (unit == null)
                 throw new IllegalArgumentException("Unit cannot be null");
@@ -49,14 +75,14 @@ public class QuantityMeasurementApp {
             return value;
         }
 
-        public WeightUnit getUnit() {
+        public U getUnit() {
             return unit;
         }
 
 
-        // Convert weight to another unit
+        // ---------- CONVERSION ----------
 
-        public QuantityMeasurement convertTo(WeightUnit targetUnit) {
+        public Quantity<U> convertTo(U targetUnit) {
 
             if (targetUnit == null)
                 throw new IllegalArgumentException("Target unit cannot be null");
@@ -67,15 +93,13 @@ public class QuantityMeasurementApp {
             double convertedValue =
                     targetUnit.convertFromBaseUnit(baseValue);
 
-            return new QuantityMeasurement(convertedValue, targetUnit);
+            return new Quantity<>(convertedValue, targetUnit);
         }
 
 
-        // Add two weights
+        // ---------- ADDITION ----------
 
-        public QuantityMeasurement add(
-                QuantityMeasurement other,
-                WeightUnit targetUnit) {
+        public Quantity<U> add(Quantity<U> other, U targetUnit) {
 
             if (other == null || targetUnit == null)
                 throw new IllegalArgumentException("Invalid parameters");
@@ -91,9 +115,11 @@ public class QuantityMeasurementApp {
             double result =
                     targetUnit.convertFromBaseUnit(sum);
 
-            return new QuantityMeasurement(result, targetUnit);
+            return new Quantity<>(result, targetUnit);
         }
 
+
+        // ---------- EQUALITY ----------
 
         @Override
         public boolean equals(Object obj) {
@@ -101,11 +127,14 @@ public class QuantityMeasurementApp {
             if (this == obj)
                 return true;
 
-            if (!(obj instanceof QuantityMeasurement))
+            if (!(obj instanceof Quantity<?>))
                 return false;
 
-            QuantityMeasurement other =
-                    (QuantityMeasurement) obj;
+            Quantity<?> other =
+                    (Quantity<?>) obj;
+
+            if (!unit.getClass().equals(other.unit.getClass()))
+                return false;
 
             double base1 =
                     unit.convertToBaseUnit(value);
