@@ -2,12 +2,34 @@ package com.quantity;
 
 public class QuantityMeasurementApp {
 
-    public interface IMeasurable {
-        double toBase(double value);
-        double fromBase(double baseValue);
+    // ---------- FUNCTIONAL INTERFACE ----------
+
+    @FunctionalInterface
+    public interface SupportsArithmetic {
+        boolean isSupported();
     }
 
-    // ---------------- WEIGHT ----------------
+    // ---------- MAIN INTERFACE ----------
+
+    public interface IMeasurable {
+
+        SupportsArithmetic supportsArithmetic = () -> true;
+
+        double toBase(double value);
+
+        double fromBase(double baseValue);
+
+        default boolean supportsArithmetic() {
+            return supportsArithmetic.isSupported();
+        }
+
+        default void validateOperationSupport(String operation) {
+            // default: allowed
+        }
+    }
+
+
+    // ---------- WEIGHT ----------
 
     public enum WeightUnit implements IMeasurable {
 
@@ -30,7 +52,7 @@ public class QuantityMeasurementApp {
     }
 
 
-    // ---------------- VOLUME ----------------
+    // ---------- VOLUME ----------
 
     public enum VolumeUnit implements IMeasurable {
 
@@ -53,7 +75,46 @@ public class QuantityMeasurementApp {
     }
 
 
-    // ---------------- GENERIC QUANTITY ----------------
+    // ---------- TEMPERATURE ----------
+
+    public enum TemperatureUnit implements IMeasurable {
+
+        CELSIUS,
+        FAHRENHEIT;
+
+        SupportsArithmetic supportsArithmetic = () -> false;
+
+        public double toBase(double value) {
+
+            if (this == FAHRENHEIT)
+                return (value - 32) * 5 / 9;
+
+            return value;
+        }
+
+        public double fromBase(double baseValue) {
+
+            if (this == FAHRENHEIT)
+                return (baseValue * 9 / 5) + 32;
+
+            return baseValue;
+        }
+
+        @Override
+        public boolean supportsArithmetic() {
+            return supportsArithmetic.isSupported();
+        }
+
+        @Override
+        public void validateOperationSupport(String operation) {
+
+            throw new UnsupportedOperationException(
+                    "Temperature does not support " + operation);
+        }
+    }
+
+
+    // ---------- GENERIC QUANTITY ----------
 
     public static class Quantity<U extends IMeasurable> {
 
@@ -61,78 +122,97 @@ public class QuantityMeasurementApp {
         private final U unit;
 
         public Quantity(double value, U unit) {
+
+            if (unit == null)
+                throw new IllegalArgumentException("Unit cannot be null");
+
             this.value = value;
             this.unit = unit;
         }
+
 
         public double getValue() {
             return value;
         }
 
-        public U getUnit() {
-            return unit;
-        }
-
-
-        // -------- ADD --------
 
         public Quantity<U> add(Quantity<U> other, U targetUnit) {
 
-            double base1 = unit.toBase(value);
-            double base2 = other.unit.toBase(other.value);
+            unit.validateOperationSupport("addition");
 
-            double result = base1 + base2;
+            double base =
+                    unit.toBase(value)
+                            + other.unit.toBase(other.value);
 
-            double converted = targetUnit.fromBase(result);
-
-            return new Quantity<>(converted, targetUnit);
+            return new Quantity<>(
+                    targetUnit.fromBase(base),
+                    targetUnit);
         }
 
-
-        // -------- SUBTRACT (UC12) --------
 
         public Quantity<U> subtract(Quantity<U> other) {
-            return subtract(other, this.unit);
+
+            unit.validateOperationSupport("subtraction");
+
+            double base =
+                    unit.toBase(value)
+                            - other.unit.toBase(other.value);
+
+            return new Quantity<>(
+                    unit.fromBase(base),
+                    unit);
         }
 
-        public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
-
-            if (other == null)
-                throw new IllegalArgumentException("Other quantity cannot be null");
-
-            if (!unit.getClass().equals(other.unit.getClass()))
-                throw new IllegalArgumentException("Different measurement category");
-
-            double base1 = unit.toBase(value);
-            double base2 = other.unit.toBase(other.value);
-
-            double result = base1 - base2;
-
-            double converted = targetUnit.fromBase(result);
-
-            return new Quantity<>(round(converted), targetUnit);
-        }
-
-
-        // -------- DIVIDE (UC12) --------
 
         public double divide(Quantity<U> other) {
 
-            if (other == null)
-                throw new IllegalArgumentException("Other quantity cannot be null");
+            unit.validateOperationSupport("division");
 
-            double base1 = unit.toBase(value);
-            double base2 = other.unit.toBase(other.value);
+            double base1 =
+                    unit.toBase(value);
+
+            double base2 =
+                    other.unit.toBase(other.value);
 
             if (base2 == 0)
-                throw new ArithmeticException("Division by zero");
+                throw new ArithmeticException("Divide by zero");
 
             return base1 / base2;
         }
 
 
-        private double round(double value) {
-            return Math.round(value * 100.0) / 100.0;
+        public Quantity<U> convertTo(U targetUnit) {
+
+            double base =
+                    unit.toBase(value);
+
+            double converted =
+                    targetUnit.fromBase(base);
+
+            return new Quantity<>(converted, targetUnit);
+        }
+
+
+        @Override
+        public boolean equals(Object obj) {
+
+            if (!(obj instanceof Quantity<?>))
+                return false;
+
+            Quantity<?> other =
+                    (Quantity<?>) obj;
+
+            if (!unit.getClass()
+                    .equals(other.unit.getClass()))
+                return false;
+
+            double base1 =
+                    unit.toBase(value);
+
+            double base2 =
+                    other.unit.toBase(other.value);
+
+            return Math.abs(base1 - base2) < 0.001;
         }
     }
 }

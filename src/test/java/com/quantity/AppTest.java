@@ -4,68 +4,53 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.quantity.QuantityMeasurementApp.Quantity;
-import com.quantity.QuantityMeasurementApp.WeightUnit;
-import com.quantity.QuantityMeasurementApp.VolumeUnit;
+import com.quantity.QuantityMeasurementApp.TemperatureUnit;
 
 public class AppTest {
 
     private static final double EPSILON = 0.001;
 
+
     @Test
-    void testWeightSubtraction() {
+    void testTemperatureEquality() {
 
-        Quantity<WeightUnit> w1 =
-                new Quantity<>(10.0, WeightUnit.KILOGRAM);
+        Quantity<TemperatureUnit> t1 =
+                new Quantity<>(0.0, TemperatureUnit.CELSIUS);
 
-        Quantity<WeightUnit> w2 =
-                new Quantity<>(5000.0, WeightUnit.GRAM);
+        Quantity<TemperatureUnit> t2 =
+                new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
 
-        Quantity<WeightUnit> result =
-                w1.subtract(w2);
-
-        assertEquals(5.0, result.getValue(), EPSILON);
+        assertEquals(t1, t2);
     }
 
+
     @Test
-    void testVolumeSubtraction() {
+    void testTemperatureConversion() {
 
-        Quantity<VolumeUnit> v1 =
-                new Quantity<>(5.0, VolumeUnit.LITRE);
+        Quantity<TemperatureUnit> t =
+                new Quantity<>(100.0, TemperatureUnit.CELSIUS);
 
-        Quantity<VolumeUnit> v2 =
-                new Quantity<>(2000.0, VolumeUnit.MILLILITRE);
+        Quantity<TemperatureUnit> result =
+                t.convertTo(TemperatureUnit.FAHRENHEIT);
 
-        Quantity<VolumeUnit> result =
-                v1.subtract(v2);
-
-        assertEquals(3.0, result.getValue(), EPSILON);
+        assertEquals(212.0,
+                result.getValue(),
+                EPSILON);
     }
 
-    @Test
-    void testWeightDivision() {
-
-        Quantity<WeightUnit> w1 =
-                new Quantity<>(10.0, WeightUnit.KILOGRAM);
-
-        Quantity<WeightUnit> w2 =
-                new Quantity<>(5.0, WeightUnit.KILOGRAM);
-
-        double result = w1.divide(w2);
-
-        assertEquals(2.0, result, EPSILON);
-    }
 
     @Test
-    void testVolumeDivision() {
+    void testTemperatureUnsupportedAddition() {
 
-        Quantity<VolumeUnit> v1 =
-                new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
+        Quantity<TemperatureUnit> t1 =
+                new Quantity<>(100.0, TemperatureUnit.CELSIUS);
 
-        Quantity<VolumeUnit> v2 =
-                new Quantity<>(1.0, VolumeUnit.LITRE);
+        Quantity<TemperatureUnit> t2 =
+                new Quantity<>(50.0, TemperatureUnit.CELSIUS);
 
-        double result = v1.divide(v2);
-
-        assertEquals(1.0, result, EPSILON);
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> t1.add(t2, TemperatureUnit.CELSIUS)
+        );
     }
 }
