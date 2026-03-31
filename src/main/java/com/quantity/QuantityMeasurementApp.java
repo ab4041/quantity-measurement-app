@@ -4,23 +4,23 @@ public class QuantityMeasurementApp {
 
     public enum LengthUnit {
 
-        FEET(12.0),
-        INCH(1.0),
-        YARD(36.0),
-        CM(0.393701);
+        FEET(1.0),
+        INCH(1.0 / 12.0),
+        YARD(3.0),
+        CM(1.0 / 30.48);
 
-        private final double toInchFactor;
+        private final double conversionFactor;
 
-        LengthUnit(double toInchFactor) {
-            this.toInchFactor = toInchFactor;
+        LengthUnit(double conversionFactor) {
+            this.conversionFactor = conversionFactor;
         }
 
-        public double toBaseUnit(double value) {
-            return value * this.toInchFactor;
+        public double convertToBaseUnit(double value) {
+            return value * conversionFactor;
         }
 
-        public double fromBaseUnit(double value) {
-            return value / this.toInchFactor;
+        public double convertFromBaseUnit(double baseValue) {
+            return baseValue / conversionFactor;
         }
     }
 
@@ -30,22 +30,18 @@ public class QuantityMeasurementApp {
         private final double value;
         private final LengthUnit unit;
 
-
         public QuantityMeasurement(double value, LengthUnit unit) {
 
-            if (unit == null) {
+            if (unit == null)
                 throw new IllegalArgumentException("Unit cannot be null");
-            }
 
             this.value = value;
             this.unit = unit;
         }
 
-
         public double getValue() {
             return value;
         }
-
 
         public LengthUnit getUnit() {
             return unit;
@@ -56,29 +52,22 @@ public class QuantityMeasurementApp {
                 QuantityMeasurement other,
                 LengthUnit targetUnit) {
 
-            if (other == null || targetUnit == null) {
+            if (other == null || targetUnit == null)
                 throw new IllegalArgumentException("Invalid parameters");
-            }
 
-            // convert both values to base unit (inches)
-            double thisInInches =
-                    this.unit.toBaseUnit(this.value);
+            double thisBase =
+                    unit.convertToBaseUnit(value);
 
-            double otherInInches =
-                    other.unit.toBaseUnit(other.value);
+            double otherBase =
+                    other.unit.convertToBaseUnit(other.value);
 
-            // add them
-            double sumInInches =
-                    thisInInches + otherInInches;
+            double sum =
+                    thisBase + otherBase;
 
-            // convert to target unit
-            double resultValue =
-                    targetUnit.fromBaseUnit(sumInInches);
+            double result =
+                    targetUnit.convertFromBaseUnit(sum);
 
-            return new QuantityMeasurement(
-                    resultValue,
-                    targetUnit
-            );
+            return new QuantityMeasurement(result, targetUnit);
         }
     }
 }
