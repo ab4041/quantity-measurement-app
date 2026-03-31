@@ -4,7 +4,6 @@ import java.util.Objects;
 
 public class QuantityMeasurementApp {
 
-    // ENUM inside main class
     public enum LengthUnit {
 
         FEET(1.0),
@@ -13,7 +12,7 @@ public class QuantityMeasurementApp {
 
         YARDS(3.0),
 
-        CENTIMETERS(0.0328084); // 1 cm = 0.0328084 feet
+        CENTIMETERS(0.0328084);
 
         private final double conversionFactor;
 
@@ -24,9 +23,13 @@ public class QuantityMeasurementApp {
         public double toFeet(double value) {
             return value * conversionFactor;
         }
+
+        public double getConversionFactor() {
+            return conversionFactor;
+        }
     }
 
-    // Generic Quantity Class
+
     public static class QuantityMeasurement {
 
         private final double value;
@@ -37,12 +40,28 @@ public class QuantityMeasurementApp {
             if (unit == null)
                 throw new IllegalArgumentException("Unit cannot be null");
 
+            if (!Double.isFinite(value))
+                throw new IllegalArgumentException("Invalid value");
+
             this.value = value;
             this.unit = unit;
         }
 
         private double toFeet() {
             return unit.toFeet(value);
+        }
+
+        public QuantityMeasurement convertTo(LengthUnit targetUnit) {
+
+            if (targetUnit == null)
+                throw new IllegalArgumentException("Target unit cannot be null");
+
+            double valueInFeet = unit.toFeet(value);
+
+            double convertedValue =
+                    valueInFeet / targetUnit.getConversionFactor();
+
+            return new QuantityMeasurement(convertedValue, targetUnit);
         }
 
         @Override
@@ -67,5 +86,23 @@ public class QuantityMeasurementApp {
         public int hashCode() {
             return Objects.hash(toFeet());
         }
+    }
+
+
+    public static double convert(
+            double value,
+            LengthUnit source,
+            LengthUnit target
+    ) {
+
+        if (!Double.isFinite(value))
+            throw new IllegalArgumentException("Invalid value");
+
+        if (source == null || target == null)
+            throw new IllegalArgumentException("Unit cannot be null");
+
+        double valueInFeet = source.toFeet(value);
+
+        return valueInFeet / target.getConversionFactor();
     }
 }
