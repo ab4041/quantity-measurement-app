@@ -1,3 +1,3 @@
-com\quantity\QuantityMeasurementApp$Feet.class
-com\quantity\QuantityMeasurementApp$Inches.class
+com\quantity\QuantityMeasurementApp$QuantityMeasurement.class
+com\quantity\QuantityMeasurementApp$LengthUnit.class
 com\quantity\QuantityMeasurementApp.class
