@@ -1,38 +1,19 @@
 package com.quantity;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+public class AppTest {
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
+    @Test
+    public void testFeetEquality_SameValue() {
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
+        QuantityMeasurementApp.Feet feet1 =
+                new QuantityMeasurementApp.Feet(1.0);
+
+        QuantityMeasurementApp.Feet feet2 =
+                new QuantityMeasurementApp.Feet(1.0);
+
+        assertTrue(feet1.equals(feet2));
     }
 }
