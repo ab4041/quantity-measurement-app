@@ -7,11 +7,8 @@ public class QuantityMeasurementApp {
     public enum LengthUnit {
 
         FEET(1.0),
-
         INCH(1.0 / 12.0),
-
         YARDS(3.0),
-
         CENTIMETERS(0.0328084);
 
         private final double conversionFactor;
@@ -41,28 +38,48 @@ public class QuantityMeasurementApp {
                 throw new IllegalArgumentException("Unit cannot be null");
 
             if (!Double.isFinite(value))
-                throw new IllegalArgumentException("Invalid value");
+                throw new IllegalArgumentException("Invalid numeric value");
 
             this.value = value;
             this.unit = unit;
         }
 
+
         private double toFeet() {
             return unit.toFeet(value);
         }
 
+
+        // UC5 conversion method
         public QuantityMeasurement convertTo(LengthUnit targetUnit) {
 
             if (targetUnit == null)
                 throw new IllegalArgumentException("Target unit cannot be null");
 
-            double valueInFeet = unit.toFeet(value);
+            double valueInFeet = this.toFeet();
 
             double convertedValue =
                     valueInFeet / targetUnit.getConversionFactor();
 
             return new QuantityMeasurement(convertedValue, targetUnit);
         }
+
+
+        // UC6 Addition method
+        public QuantityMeasurement add(QuantityMeasurement other) {
+
+            if (other == null)
+                throw new IllegalArgumentException("Second operand cannot be null");
+
+            double sumFeet =
+                    this.toFeet() + other.toFeet();
+
+            double resultValue =
+                    sumFeet / this.unit.getConversionFactor();
+
+            return new QuantityMeasurement(resultValue, this.unit);
+        }
+
 
         @Override
         public boolean equals(Object obj) {
@@ -82,6 +99,7 @@ public class QuantityMeasurementApp {
             ) == 0;
         }
 
+
         @Override
         public int hashCode() {
             return Objects.hash(toFeet());
@@ -89,6 +107,7 @@ public class QuantityMeasurementApp {
     }
 
 
+    // UC5 static conversion API
     public static double convert(
             double value,
             LengthUnit source,
@@ -96,10 +115,10 @@ public class QuantityMeasurementApp {
     ) {
 
         if (!Double.isFinite(value))
-            throw new IllegalArgumentException("Invalid value");
+            throw new IllegalArgumentException("Invalid numeric value");
 
         if (source == null || target == null)
-            throw new IllegalArgumentException("Unit cannot be null");
+            throw new IllegalArgumentException("Units cannot be null");
 
         double valueInFeet = source.toFeet(value);
 
