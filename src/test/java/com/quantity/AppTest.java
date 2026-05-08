@@ -2,34 +2,31 @@ package com.quantity;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.quantity.controller.QuantityMeasurementController;
-import com.quantity.dto.QuantityDTO;
-import com.quantity.repository.QuantityMeasurementCacheRepository;
-import com.quantity.service.QuantityMeasurementServiceImpl;
+import com.quantity.entity.QuantityMeasurementEntity;
+import com.quantity.repository.QuantityMeasurementDatabaseRepository;
 
 public class AppTest {
 
     @Test
-    void testAddition() {
+    void testDatabaseSave() {
 
-        QuantityMeasurementController controller =
-                new QuantityMeasurementController(
+        QuantityMeasurementDatabaseRepository repo =
+                new QuantityMeasurementDatabaseRepository();
 
-                        new QuantityMeasurementServiceImpl(
+        repo.deleteAll();
 
-                                QuantityMeasurementCacheRepository.getInstance()
-                        )
-                );
+        repo.save(
+                new QuantityMeasurementEntity(
+                        "addition",
+                        15.0
+                )
+        );
 
-        QuantityDTO result =
-                controller.performAddition(
-
-                        new QuantityDTO(10, "KG"),
-                        new QuantityDTO(5, "KG")
-                );
-
-        assertEquals(15.0, result.getValue());
+        assertEquals(
+                1,
+                repo.getTotalCount()
+        );
     }
 }

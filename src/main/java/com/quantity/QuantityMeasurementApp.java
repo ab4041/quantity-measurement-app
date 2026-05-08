@@ -2,7 +2,7 @@ package com.quantity;
 
 import com.quantity.controller.QuantityMeasurementController;
 import com.quantity.dto.QuantityDTO;
-import com.quantity.repository.QuantityMeasurementCacheRepository;
+import com.quantity.repository.QuantityMeasurementDatabaseRepository;
 import com.quantity.service.QuantityMeasurementServiceImpl;
 
 public class QuantityMeasurementApp {
@@ -14,19 +14,22 @@ public class QuantityMeasurementApp {
 
                         new QuantityMeasurementServiceImpl(
 
-                                QuantityMeasurementCacheRepository.getInstance()
+                                new QuantityMeasurementDatabaseRepository()
                         )
                 );
 
         QuantityDTO result =
                 controller.performAddition(
 
-                        new QuantityDTO(5, "KG"),
+                        new QuantityDTO(10, "KG"),
                         new QuantityDTO(5, "KG")
                 );
 
         System.out.println(
-                "Result = " + result.getValue()
+                "Addition Result = "
+                        + result.getValue()
+                        + " "
+                        + result.getUnit()
         );
     }
 }
