@@ -1,3 +1,10 @@
-com\quantity\QuantityMeasurementApp$QuantityMeasurement.class
-com\quantity\QuantityMeasurementApp$LengthUnit.class
+com\quantity\dto\QuantityDTO.class
+com\quantity\service\IQuantityMeasurementService.class
+com\quantity\model\QuantityModel.class
 com\quantity\QuantityMeasurementApp.class
+com\quantity\entity\QuantityMeasurementEntity.class
+com\quantity\exception\QuantityMeasurementException.class
+com\quantity\repository\IQuantityMeasurementRepository.class
+com\quantity\controller\QuantityMeasurementController.class
+com\quantity\repository\QuantityMeasurementCacheRepository.class
+com\quantity\service\QuantityMeasurementServiceImpl.class
