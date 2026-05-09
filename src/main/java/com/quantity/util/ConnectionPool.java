@@ -6,14 +6,22 @@ import java.sql.SQLException;
 
 public class ConnectionPool {
 
+    private static final String URL =
+            "jdbc:h2:mem:quantitymeasurementdb;DB_CLOSE_DELAY=-1";
+
+    private static final String USER =
+            "sa";
+
+    private static final String PASSWORD =
+            "";
+
     public static Connection getConnection()
             throws SQLException {
 
         return DriverManager.getConnection(
-
-                ApplicationConfig.getProperty("db.url"),
-                ApplicationConfig.getProperty("db.username"),
-                ApplicationConfig.getProperty("db.password")
+                URL,
+                USER,
+                PASSWORD
         );
     }
 }
